@@ -20,7 +20,7 @@ currSize = 0
 testSizes = {}
 
 for l in sys.stdin:
-    currSize += 8 * len(l)
+    currSize += len(l)
 
     if inPrelude and preludeRegexp.search(l):
         inPrelude = False
@@ -32,19 +32,22 @@ for l in sys.stdin:
     if m:
         newTest = m.group(1)
         if currTest:
-            testSizes[currTest] = currSize - 8 * len(l)
-            currSize = 8 * len(l)
+            testSizes[currTest] = currSize - len(l)
+            currSize = len(l)
         else:
             # Previous section was the prelude
-            assert currSize == 8 * len(l)
+            assert currSize == len(l)
         currTest = newTest
 
-for t, sizes in testSizes.iteritems():
-    print '{0:10} bytes from test {1}'.format(sizes, t)
 
+totalSize = 0
+
+for t, size in testSizes.iteritems():
+    print '{0:10} bytes from test {1}'.format(size, t)
+    totalSize += size
+
+totalSize += currSize
 
 print '{0:10} bytes from the end'.format(currSize)
 
-
-
-
+print 'total size of', totalSize, 'bytes.'
