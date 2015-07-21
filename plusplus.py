@@ -11,35 +11,37 @@ import sys
 
 winPatt = re.compile('\d\d:\d\d:\d\d\W+INFO -  (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
 
-
 #11:28:12     INFO -  ++DOMWINDOW == 1 (0xa7a75c00) [pid = 2238] [serial = 1] [outer = (nil)]
 
-live = set([])
 
-for l in sys.stdin:
-    m = winPatt.match(l)
-    if not m:
-        continue
-    isNew = m.group(1) == '++'
-    assert isNew or m.group(1) == '--'
+def findLeakers():
+    live = set([])
 
-    numLive = int(m.group(2))
-    pid = int(m.group(3))
-    serial = int(m.group(4))
+    for l in sys.stdin:
+        m = winPatt.match(l)
+        if not m:
+            continue
+        isNew = m.group(1) == '++'
+        assert isNew or m.group(1) == '--'
 
-    #print isNew, 'XXX serial=' , serial, 'XXX pid=', pid, 'XXX', l[:-1]
+        numLive = int(m.group(2))
+        pid = int(m.group(3))
+        serial = int(m.group(4))
 
-    winId = (pid, serial)
+        #print isNew, 'XXX serial=' , serial, 'XXX pid=', pid, 'XXX', l[:-1]
 
-    if isNew:
-        live.add(winId)
-    else:
-        assert winId in live
-        live.remove(winId)
+        winId = (pid, serial)
 
-
-# Print out informatio about leaking windows.
-for x in live:
-    print "[pid = {0}] [serial = {1}]".format(x[0], x[1])
+        if isNew:
+            live.add(winId)
+        else:
+            assert winId in live
+            live.remove(winId)
 
 
+    # Print out information about leaking windows.
+    for x in live:
+        print "[pid = {0}] [serial = {1}]".format(x[0], x[1])
+
+
+findLeakers()
