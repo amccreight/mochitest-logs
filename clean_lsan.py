@@ -9,18 +9,20 @@
 import sys
 import re
 
-prefixPatt1 = re.compile('^\d\d:\d\d:\d\d\s+INFO -\s+\d+ INFO (.*)$')
-prefixPatt2 = re.compile('^[ 0-9]\d:\d\d\.\d\d (.*)')
-prefixPatt3 = re.compile('^[ 0-9]\d:\d\d:\d\d     INFO -  (.*)')
+
+prefixPatt1 = re.compile('^\d\d:\d\d:\d\d\s+INFO -  (.*)$')
+prefixPatt2 = re.compile('^\d\d:\d\d:\d\d\s+INFO -\s+\d+ INFO (.*)$')
+prefixPatt3 = re.compile('^[ 0-9]\d:\d\d\.\d\d (.*)')
+prefixPatt4 = re.compile('^[ 0-9]\d:\d\d:\d\d     INFO -  (.*)')
 
 # prefixPatt1 works with the structured log format, circa Fx33.  The other patterns may be needed for older log output.
 prefixPatt = prefixPatt1
 
-lsanPatt = re.compile('^(?:SUMMARY: LeakSanitizer|Indirect leak of|Direct leak of|$|    #\d|#\d)')
+
+lsanPatt = re.compile('^(?:SUMMARY: AddressSanitizer|LeakSanitizer|Indirect leak of|Direct leak of|$|    #\d|#\d)')
 # the last case is for crash test logs, which don't have leading spaces for some reason.
 
 stackHeaderPatt = re.compile('^(Indirect|Direct) leak of (\d+) byte\(s\) in (\d+) object\(s\) allocated from:$')
-
 
 
 def load_log(fname):
@@ -33,12 +35,10 @@ def load_log(fname):
 
     traces = []
 
-
     for l in f:
         lm = prefixPatt.match(l)
         if lm:
             l2 = lm.group(1)
-            print l2
         else:
             l2 = l[:-1]
 
@@ -54,8 +54,10 @@ def load_log(fname):
             continue
 
         if l2[0] == 'I' or l2[0] == 'D':
-            hm = stackHeaderPatt.match(l)
-            assert(hm)
+            hm = stackHeaderPatt.match(l2)
+            if not hm:
+                print 'Bad stack trace header:', l
+                exit(0)
             isDirect = (hm.group(1) == 'Direct')
             leakBytes = int(hm.group(2))
             numLeaked = int(hm.group(3))
