@@ -45,18 +45,19 @@ for l in sys.stdin:
 
 
 
-
 keys = sorted(counts.keys())
 keys.reverse()
 
+print 'Number of windows opened in each test.'
 for k in keys[:10]:
     print k, ', '.join(counts[k])
-
 print
+
 
 keys = sorted(peaks.keys())
 keys.reverse()
 
+print 'Peak number of live windows in each test.'
 for k in keys[:10]:
     print k, ', '.join(peaks[k])
 
