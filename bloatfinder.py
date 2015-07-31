@@ -24,6 +24,16 @@ def stringFromTime(t0):
     return '{:0>2}:{:0>2}:{:0>2}'.format(h, mi, se)
 
 
+scaleFactor = 10
+
+def writeStars(count):
+    count = count / scaleFactor
+    i = 0
+    while i < count:
+        sys.stdout.write('*')
+        i += 1
+
+
 def windowsPerSecondChart(windowsPerSecond):
     keys = sorted(windowsPerSecond.keys())
     prevKey = keys[0] - 1
@@ -33,15 +43,54 @@ def windowsPerSecondChart(windowsPerSecond):
             print stringFromTime(prevKey)
         count = windowsPerSecond.get(k, 0)
         sys.stdout.write(stringFromTime(k) + ' ')
-        i = 0
-        while i < count:
-            sys.stdout.write('*')
-            i += 1
+        writeStars(count)
         print
 
         prevKey = k
 
 
+def peakWindowsPerSecondChart(peakWindowsPerSecond, lastLiveWindowsPerSecond):
+    keys = sorted(peakWindowsPerSecond.keys())
+    prevKey = keys[0] - 1
+    lastLive = lastLiveWindowsPerSecond.get(keys[0], 0)
+    for k in keys:
+        while prevKey + 1 < k:
+            prevKey += 1
+            # We're measuring the peak number of windows across a given
+            # second, not the final number of windows live in that second,
+            # so we can't just reuse the previous value.
+            sys.stdout.write(stringFromTime(prevKey) + ' ')
+            writeStars(lastLive)
+            print
+
+        count = peakWindowsPerSecond.get(k, 0)
+        sys.stdout.write(stringFromTime(k) + ' ')
+        writeStars(count)
+        lastLive = lastLiveWindowsPerSecond.get(k)
+        print
+
+        prevKey = k
+
+
+def windowsPerTest(counts):
+    keys = sorted(counts.keys())
+    keys.reverse()
+
+    print 'Number of windows opened in each test.'
+    for k in keys[:10]:
+        print k, ', '.join(counts[k])
+
+
+def peakWindowsPerTest(peaks):
+    keys = sorted(peaks.keys())
+    keys.reverse()
+
+    print 'Peak number of live windows in each test.'
+    for k in keys[:10]:
+        print k, ', '.join(peaks[k])
+
+
+# Parse the input looking for when tests run and when windows are opened or closed.
 
 test = None
 numLive = 0
@@ -53,6 +102,8 @@ counts = {}
 peaks = {}
 
 windowsPerSecond = {}
+peakWindowsPerSecond = {}
+lastLiveWindowsPerSecond = {}
 
 for l in sys.stdin:
     if l.find("TEST-START") > -1:
@@ -72,29 +123,28 @@ for l in sys.stdin:
         windowsPerSecond[t] = windowsPerSecond.setdefault(t, 1) + 1
         if numLive > peakNumLive:
             peakNumLive = numLive
+        if numLive > peakWindowsPerSecond.setdefault(t, 0):
+            peakWindowsPerSecond[t] = numLive
+        lastLiveWindowsPerSecond[t] = numLive
     else:
         assert m.group(2) == '--'
         assert numLive > 0
         numLive -= 1
 
+        if numLive > peakWindowsPerSecond.setdefault(t, 0):
+            peakWindowsPerSecond[t] = numLive
+        lastLiveWindowsPerSecond[t] = numLive
 
 
-windowsPerSecondChart(windowsPerSecond)
-exit(0)
+# Various output.
 
-keys = sorted(counts.keys())
-keys.reverse()
+#windowsPerSecondChart(windowsPerSecond)
 
-print 'Number of windows opened in each test.'
-for k in keys[:10]:
-    print k, ', '.join(counts[k])
-print
+peakWindowsPerSecondChart(peakWindowsPerSecond, lastLiveWindowsPerSecond)
 
+#windowsPerTest(counts)
+#print
 
-keys = sorted(peaks.keys())
-keys.reverse()
+#peakWindowsPerTest(peaks)
 
-print 'Peak number of live windows in each test.'
-for k in keys[:10]:
-    print k, ', '.join(peaks[k])
 
