@@ -15,7 +15,7 @@ testFailPatt = re.compile('TEST-UNEXPECTED-FAIL \| ([^ ]*)')
 
 
 
-def analyzeMochitestLog(mlog):
+def analyzeMochitestLog(mlog, disabledTestsFile):
     runningTests = set([])
     failedTests = set([])
 
@@ -36,8 +36,7 @@ def analyzeMochitestLog(mlog):
 
     # Get the known list of tests that don't run in e10s.
     disabledTests = set([])
-    f = open('disabled_mochitests.txt', 'r')
-    for l in f:
+    for l in disabledTestsFile:
         disabledTests.add(l[:-1])
 
     okTests = []
@@ -67,11 +66,13 @@ def analyzeMochitestLog(mlog):
 
 
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     sys.stderr.write('Not enough arguments.\n')
     exit()
 
 
-f = open(sys.argv[1], 'r')
-analyzeMochitestLog(f)
-f.close()
+f1 = open(sys.argv[1], 'r')
+f2 = open(sys.argv[2], 'r')
+analyzeMochitestLog(f1, f2)
+f1.close()
+f2.close()
