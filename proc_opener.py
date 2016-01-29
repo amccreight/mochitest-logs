@@ -13,6 +13,8 @@ import time
 
 procStartPatt = re.compile('^\d\d:\d\d:\d\d\W+INFO -  ### XPCOM\_MEM\_BLOAT\_LOG defined -- logging bloat\/leaks to .+runtests\_leaks\_tab\_pid(\d+)\.log')
 
+failedProcStartPatt = re.compile('^\d\d:\d\d:\d\d\W+INFO -  ### XPCOM\_MEM\_BLOAT\_LOG defined -- unable to log bloat\/leaks to .+runtests\_leaks\_tab\_pid(\d+)\.log')
+
 
 def testDir(testName):
     return currTest.rsplit('/', 1)[0] + '/'
@@ -28,6 +30,10 @@ for l in sys.stdin:
         currTest = l.split('|')[1].strip()
     m = procStartPatt.match(l)
     if not m:
+        m = failedProcStartPatt.match(l)
+        if m:
+            currProc = int(m.group(1))
+            print('WARNING! Failed to open log for pid ' + str(currProc) + ' in test dir ' + testDir(currTest))
         continue
     currProc = int(m.group(1))
     if currProc in pidTests and testDir(currTest) == testDir(pidTests[currProc]):
@@ -35,7 +41,7 @@ for l in sys.stdin:
         print('WARNING! Possible replay of pid ' + str(currProc) + ' in test dir ' + testDir(currTest))
     pidTests.setdefault(currProc, []).append(currTest)
     print 'Found proc start:', currProc, currTest
-
+    print 'Start in directory ', testDir(currTest)
 
 
 
