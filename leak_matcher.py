@@ -40,7 +40,8 @@ for l in sys.stdin:
         print 'Not enough characters in address:', addr, l,
 
     if isCreate:
-        assert not addr in live
+        if addr in live:
+            print 'Duplicate creation of', addr
         assert currTest
         live[addr] = currTest
     else:
