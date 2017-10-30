@@ -9,10 +9,7 @@
 import re
 import sys
 
-winPatt = re.compile('\d\d:\d\d:\d\d\W+INFO -  GECKO\(\d+\) \| (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
-
-#13:42:33     INFO -  GECKO(1652) | ++DOMWINDOW == 1 (0D89C800) [pid = 1652] [serial = 1] [outer = 00000000]
-
+winPatt = re.compile('\d\d:\d\d:\d\d\W+INFO -\W+GECKO\(\d+\) \| (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
 
 
 def findLeakers():
