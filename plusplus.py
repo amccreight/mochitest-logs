@@ -9,16 +9,16 @@
 import re
 import sys
 
-winPatt = re.compile('\d\d:\d\d:\d\d\W+INFO -\W+GECKO\(\d+\) \| (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
-
+winPatt = re.compile('INFO -\W+GECKO\(\d+\) \| (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
 
 def findLeakers():
     live = set([])
 
     for l in sys.stdin:
-        m = winPatt.match(l)
+        m = winPatt.search(l)
         if not m:
             continue
+
         isNew = m.group(1) == '++'
         assert isNew or m.group(1) == '--'
 
