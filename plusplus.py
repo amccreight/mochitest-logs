@@ -9,7 +9,7 @@
 import re
 import sys
 
-winPatt = re.compile('INFO -\W+GECKO\(\d+\) \| (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
+winPatt = re.compile('.*I/DocShellAndDOMWindowLeak (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
 
 def findLeakers():
     live = set([])
