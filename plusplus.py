@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -44,7 +44,7 @@ def findLeakers():
 
     # Print out information about leaking windows.
     for x in live:
-        print "[pid = {0}] [serial = {1}]".format(x[0], x[1])
+        print("[pid = {0}] [serial = {1}]".format(x[0], x[1]))
 
 
 findLeakers()
