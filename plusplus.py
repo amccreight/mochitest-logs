@@ -13,6 +13,7 @@ winPatt = re.compile('INFO -\W+GECKO\(\d+\) \| (..)DOMWINDOW == (\d+).*\[pid = (
 
 def findLeakers():
     live = set([])
+    foundAny = False
 
     for l in sys.stdin:
         m = winPatt.search(l)
@@ -32,10 +33,14 @@ def findLeakers():
 
         if isNew:
             live.add(winId)
+            foundAny = True
         else:
             assert winId in live
             live.remove(winId)
 
+
+    if not foundAny:
+        print("Didn't find any windows in the log.")
 
     # Print out information about leaking windows.
     for x in live:
