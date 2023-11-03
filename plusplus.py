@@ -9,10 +9,15 @@
 import re
 import sys
 
-winPatt = re.compile('.*I/DocShellAndDOMWindowLeak (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\]')
+winPatt = re.compile('.*I/DocShellAndDOMWindowLeak (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\] \[[^\]]+\].?(\[url = [^\]]+)?')
+urlLen = len('[url = ')
+
+#[task 2020-05-19T14:19:44.223Z] 14:19:44     INFO - GECKO(1230) | [(null) 1230: Main Thread]: I/DocShellAndDOMWindowLeak ++DOMWINDOW == 1 (0x7fc8cc397520) [pid = 1230] [serial = 1] [outer = (nil)]
+
+#[task 2020-05-19T14:19:59.248Z] 14:19:59     INFO - GECKO(1230) | [Child 1308: Main Thread]: I/DocShellAndDOMWindowLeak --DOMWINDOW == 3 (0x7f4be4689400) [pid = 1308] [serial = 2] [outer = (nil)] [url = about:blank]
 
 def findLeakers():
-    live = set([])
+    live = {}
     foundAny = False
 
     for l in sys.stdin:
@@ -26,25 +31,31 @@ def findLeakers():
         numLive = int(m.group(2))
         pid = int(m.group(3))
         serial = int(m.group(4))
+        url = m.group(5)
+        if url:
+            url = url[urlLen:]
 
-        #print isNew, 'XXX serial=' , serial, 'XXX pid=', pid, 'XXX', l[:-1]
+        if url:
+            print("URL ME " + url)
 
         winId = (pid, serial)
 
         if isNew:
-            live.add(winId)
+            assert not winId in live
+            assert url is None
+            live[winId] = url
             foundAny = True
         else:
             assert winId in live
-            live.remove(winId)
+            del live[winId]
 
 
     if not foundAny:
         print("Didn't find any windows in the log.")
 
     # Print out information about leaking windows.
-    for x in live:
-        print("[pid = {0}] [serial = {1}]".format(x[0], x[1]))
+    for x, url in live.items():
+        print("[pid = {0}] [serial = {1}] URL was {2}".format(x[0], x[1], url))
 
 
 findLeakers()
