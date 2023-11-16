@@ -18,6 +18,7 @@ urlLen = len('[url = ')
 
 def findLeakers():
     live = {}
+    hiddenLive = {}
     foundAny = False
 
     for l in sys.stdin:
@@ -35,15 +36,16 @@ def findLeakers():
         if url:
             url = url[urlLen:]
 
-        if url:
-            print("URL ME " + url)
-
         winId = (pid, serial)
 
         if isNew:
-            assert not winId in live
             assert url is None
-            live[winId] = url
+
+            if winId in live:
+                assert not winId in hiddenLive
+                hiddenLive[winId] = None
+            else:
+                live[winId] = None
             foundAny = True
         else:
             assert winId in live
@@ -54,6 +56,11 @@ def findLeakers():
         print("Didn't find any windows in the log.")
 
     # Print out information about leaking windows.
+    print("HIDDEN")
+    for x, url in hiddenLive.items():
+        print("[pid = {0}] [serial = {1}] URL was {2}".format(x[0], x[1], url))
+
+    print("OTHER")
     for x, url in live.items():
         print("[pid = {0}] [serial = {1}] URL was {2}".format(x[0], x[1], url))
 
