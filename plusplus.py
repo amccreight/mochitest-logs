@@ -138,6 +138,23 @@ def findLeakers():
         pid = x[0]
         pidToWindows.setdefault(pid, []).append([x[0], x[1], currTest])
 
+    for pid, m in pidLeaks.items():
+        print(f'pid:{pid}')
+        print('  leaked: ', end='')
+        x = []
+        for which, count in m.items():
+            x.append(f'{count} {which}')
+        print(', '.join(x))
+        for [x, y, z] in pidToWindows.get(pid, []):
+            print(f'  [pid = {x}] [serial = {y}] during {z}')
+    print()
+
+    for log, reported in leakingLogs.items():
+        print(f'log: {log}')
+        print(f'  reported test directory: {reported}')
+        print(f'  actual test: {", ".join(testsForLogs.get(log, ["NONE"]))}')
+    print()
+
     dupeCount = 0
     nonDupeCount = 0
     for log, tests in testsForLogs.items():
@@ -147,25 +164,10 @@ def findLeakers():
         dupeCount += len(tests) - 1
         if False:
             tstring = "\n  ".join(tests)
-            print(f'DUPLICATE LOGS {log}:\n  {tstring}')
-    print(f'NUMBER OF NON-DUPLICATE LOGS: {nonDupeCount}')
-    print(f'NUMBER OF DUPLICATE LOGS: {dupeCount}')
+            print(f'Duplicate logs {log}:\n  {tstring}')
+    print(f'Number of non-overridden logs: {nonDupeCount}')
+    print(f'Number of overridden logs: {dupeCount}')
     print()
-
-    for pid, m in pidLeaks.items():
-        print(f'pid:{pid}')
-        print('  leaked: ', end='')
-        for which, count in m.items():
-            print(f'{count} {which}, ', end='')
-        print()
-        for [x, y, z] in pidToWindows.get(pid, []):
-            print(f'  [pid = {x}] [serial = {y}] during {z}')
-    print()
-
-    for log, reported in leakingLogs.items():
-        print(f'log: {log}')
-        print(f'  reported test directory: {reported}')
-        print(f'  actual test: {", ".join(testsForLogs.get(log, ["NONE"]))}')
 
 
 findLeakers()
