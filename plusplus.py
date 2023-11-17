@@ -138,14 +138,18 @@ def findLeakers():
         pid = x[0]
         pidToWindows.setdefault(pid, []).append([x[0], x[1], currTest])
 
+    dupeCount = 0
     nonDupeCount = 0
     for log, tests in testsForLogs.items():
-        if len(tests) == 1:
-            nonDupeCount += 1
+        nonDupeCount += 1
+        if len(tests) <= 1:
             continue
-        tstring = "\n  ".join(tests)
-        print(f'DUPLICATE LOGS {log}:\n  {tstring}')
+        dupeCount += len(tests) - 1
+        if False:
+            tstring = "\n  ".join(tests)
+            print(f'DUPLICATE LOGS {log}:\n  {tstring}')
     print(f'NUMBER OF NON-DUPLICATE LOGS: {nonDupeCount}')
+    print(f'NUMBER OF DUPLICATE LOGS: {dupeCount}')
     print()
 
     for pid, m in pidLeaks.items():
