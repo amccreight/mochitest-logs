@@ -64,6 +64,8 @@ def findLeakers():
             isNew = m.group(1) == '++'
             assert isNew or m.group(1) == '--'
 
+            # XXX m.group(1) is the window pointer.
+            # Could use that to disambiguate.
             numLive = int(m.group(2))
             pid = int(m.group(3))
             serial = int(m.group(4))
@@ -78,9 +80,8 @@ def findLeakers():
 
                 if winId in live:
                     assert not winId in hiddenLive
-                    hiddenLive[winId] = currTest
-                else:
-                    live[winId] = currTest
+                    hiddenLive[winId] = live[winId]
+                live[winId] = currTest
                 foundAny = True
             else:
                 assert winId in live
