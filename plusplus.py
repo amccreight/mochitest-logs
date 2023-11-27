@@ -17,7 +17,7 @@ leakLogCreatePatt = re.compile('### XPCOM_MEM_BLOAT_LOG defined -- logging bloat
 
 leakLogReadPatt = re.compile('INFO \- leakcheck \| Processing leak log file (.+)$')
 
-bloatViewPatt = re.compile('BloatView: ALL \(cumulative\) LEAK AND BLOAT STATISTICS\, ([a-zA-Z]+) process (\d+)$')
+bloatViewPatt = re.compile('BloatView: ALL \(cumulative\) LEAK AND BLOAT STATISTICS\, ([a-zA-Z]+) process (\d+)')
 
 failPatt = re.compile('TEST-UNEXPECTED-FAIL \| leakcheck large nsGlobalWindowInner \| (.+)$')
 
