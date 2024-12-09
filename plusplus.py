@@ -9,21 +9,21 @@
 import re
 import sys
 
-winPatt = re.compile('I/DocShellAndDOMWindowLeak (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\] \[[^\]]+\].?(\[url = [^\]]+)?')
+winPatt = re.compile(r'I/DocShellAndDOMWindowLeak (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\] \[[^\]]+\].?(\[url = [^\]]+)?')
 urlLen = len('[url = ')
 
 
-leakLogCreatePatt = re.compile('### XPCOM_MEM_BLOAT_LOG defined -- logging bloat/leaks to (.+)$')
+leakLogCreatePatt = re.compile(r'### XPCOM_MEM_BLOAT_LOG defined -- logging bloat/leaks to (.+)$')
 
-leakLogReadPatt = re.compile('INFO \- leakcheck \| Processing leak log file (.+)$')
+leakLogReadPatt = re.compile(r'INFO \- leakcheck \| Processing leak log file (.+)$')
 
-bloatViewPatt = re.compile('BloatView: ALL \(cumulative\) LEAK AND BLOAT STATISTICS\, ([a-zA-Z]+) process (\d+)')
+bloatViewPatt = re.compile(r'BloatView: ALL \(cumulative\) LEAK AND BLOAT STATISTICS\, ([a-zA-Z]+) process (\d+)')
 
-failPatt = re.compile('TEST-UNEXPECTED-FAIL \| leakcheck large nsGlobalWindowInner \| (.+)$')
+failPatt = re.compile(r'TEST-UNEXPECTED-FAIL \| leakcheck large nsGlobalWindowInner \| (.+)$')
 
-testPatt = re.compile('INFO \- TEST-(START|SKIP|OK) \| (\S+)')
+testPatt = re.compile(r'INFO \- TEST-(START|SKIP|OK) \| (\S+)')
 
-windowCountPatt = re.compile('INFO \- TEST-INFO \| leakcheck \| [a-zA-Z]+ leaked ([0-9]+) (nsGlobalWindowInner|nsGlobalWindowOuter)')
+windowCountPatt = re.compile(r'INFO \- TEST-INFO \| leakcheck \| [a-zA-Z]+ leaked ([0-9]+) (nsGlobalWindowInner|nsGlobalWindowOuter)')
 
 def findLeakers():
     live = {}
