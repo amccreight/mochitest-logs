@@ -9,7 +9,7 @@
 import re
 import sys
 
-winPatt = re.compile(r'I/DocShellAndDOMWindowLeak (..)DOMWINDOW == (\d+).*\[pid = (\d+)\] \[serial = (\d+)\] \[[^\]]+\].?(\[url = [^\]]+)?')
+winPatt = re.compile(r'I/DocShellAndDOMWindowLeak (..)DOMWINDOW == (\d+) \(([0-9a-fA-F]+)\).*\[pid = (\d+)\] \[serial = (\d+)\] \[[^\]]+\].?(\[url = [^\]]+)?')
 urlLen = len('[url = ')
 
 
@@ -64,12 +64,11 @@ def findLeakers():
             isNew = m.group(1) == '++'
             assert isNew or m.group(1) == '--'
 
-            # XXX m.group(1) is the window pointer.
-            # Could use that to disambiguate.
             numLive = int(m.group(2))
-            pid = int(m.group(3))
-            serial = int(m.group(4))
-            url = m.group(5)
+            addr = m.group(3)
+            pid = int(m.group(4))
+            serial = int(m.group(5))
+            url = m.group(6)
             if url:
                 url = url[urlLen:]
 
@@ -81,7 +80,7 @@ def findLeakers():
                 if winId in live:
                     assert not winId in hiddenLive
                     hiddenLive[winId] = live[winId]
-                live[winId] = currTest
+                live[winId] = [addr, currTest]
                 foundAny = True
             else:
                 assert winId in live
@@ -132,12 +131,12 @@ def findLeakers():
         print("Didn't find any windows in the log.")
 
     pidToWindows = {}
-    for x, currTest in hiddenLive.items():
+    for x, data in hiddenLive.items():
         pid = x[0]
-        pidToWindows.setdefault(pid, []).append([x[0], x[1], currTest])
-    for x, currTest in live.items():
+        pidToWindows.setdefault(pid, []).append([x[0], x[1], data[0], data[1]])
+    for x, data in live.items():
         pid = x[0]
-        pidToWindows.setdefault(pid, []).append([x[0], x[1], currTest])
+        pidToWindows.setdefault(pid, []).append([x[0], x[1], data[0], data[1]])
 
     for pid, m in pidLeaks.items():
         print(f'pid:{pid}')
@@ -146,8 +145,8 @@ def findLeakers():
         for which, count in m.items():
             x.append(f'{count} {which}')
         print(', '.join(x))
-        for [x, y, z] in pidToWindows.get(pid, []):
-            print(f'  [pid = {x}] [serial = {y}] during {z}')
+        for [x, y, addr, test] in pidToWindows.get(pid, []):
+            print(f'  [pid = {x}] [serial = {y}] 0x{addr} during {test}')
     print()
 
     for log, reported in leakingLogs.items():
